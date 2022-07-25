@@ -22,12 +22,113 @@ use App\Jobs\ProcessPush;
 use App\Models\Feed_Save;
 use App\Models\Feed;
 use App\Models\vendor_timing;
+use App\Models\vendor_table;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Crypt;
 use Storage;
 class VendorController extends Controller
 {
+
+    public function fetch_table_vendors(Request $request)
+    {
+        $vendor_id=Auth::user()->id;
+
+        $table=vendor_table::where('vendor_id',$vendor_id)->get();
+
+        if(count($table)>0)
+        {
+            $response['status']=true;
+            $response['data']=$table;
+        }
+        else
+        {
+            $response['status']=false;
+            $response['msg']="No Tables found";
+        }
+
+        return  json_encode($response,JSON_UNESCAPED_SLASHES);
+    }
+
+    public function add_new_table_vendor(Request $request)
+    {
+        $vendor_id=Auth::user()->id;
+        $table=vendor_table::where('vendor_id',$vendor_id)->get();
+
+        $final=count($table);
+        $table_name="Table ".$final+1;
+        $data=new vendor_table;
+
+        $data->vendor_id=$vendor_id;
+        $data->table_name=$table_name;
+        $data->table_status='active';
+
+        if($data->save())
+        {
+            $response['status']=true;
+            $response['data']=$table;
+            $response['msg']="Table Added!";
+        }
+        else
+        {
+            $response['status']=false;
+            $response['msg']="Table could not be Added!";
+        }
+        return  json_encode($response,JSON_UNESCAPED_SLASHES);
+    }
+
+
+    public function update_other_charges_vendor (Request $request)
+    {
+        $vendor_id=Auth::user()->id;
+        $vendor=Vendor::find($vendor_id);
+
+        $vendor->gstin=$request->gstin;
+        $vendor->gst_percentage=$request->gst_percentage;
+        $vendor->service_charge=$request->service_charge;
+
+        if($vendor->save())
+        {
+            $response['status']=true;
+            $response['msg']="Charges Updated!";
+        }
+        else
+        {
+            $response['status']=false;
+            $response['msg']="charges could not be updated";
+        }
+        return  json_encode($response,JSON_UNESCAPED_SLASHES);
+    }
+
+    public function delete_table_vendor(Request $request)
+    {
+        $validator = Validator::make($request->all(), [ 
+            'table_id' => 'required', 
+        ]);
+		//return Auth::user()->id;
+
+		if ($validator->fails())
+    	{
+        	return response(['errors'=>$validator->errors()->all()], 422);
+    	}
+
+        $vendor_id=Auth::user()->id;
+
+        $data=vendor_table::where('id',$request->table_id)->delete();
+
+        if($data)
+        {
+            $response['status']=true;
+            $response['msg']="Table deleted!";
+        }
+        else
+        {
+            $response['status']=false;
+            $response['msg']="Table could not be daleted!";
+        }
+        return  json_encode($response,JSON_UNESCAPED_SLASHES);
+    }
+
     public function get_vendor_data(Request $request)
     {
         $vendor_id=Auth::user()->id;

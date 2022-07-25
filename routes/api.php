@@ -165,6 +165,12 @@ Route::middleware('auth:vendor-api')->group(function () {
 	Route::post('update_flat_deals',[VendorController::class,'update_flat_deals']);
     Route::post('get_orders_details_vendor',[VendorController::class,'get_orders_details_vendor']);
     
+    Route::post('fetch_table_vendors',[VendorController::class,'fetch_table_vendors']);
+    Route::post('add_new_table_vendor',[VendorController::class,'add_new_table_vendor']);
+    Route::post('delete_table_vendor',[VendorController::class,'delete_table_vendor']);
+    Route::post('update_other_charges_vendor',[VendorController::class,'update_other_charges_vendor']);
+   
+    
     Route::post('logout_vendor', [AuthController::class,'logout']);
 
 });
